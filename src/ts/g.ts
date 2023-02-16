@@ -4,14 +4,8 @@
   dessa hopplängder.
   */
 
-function getLength(jumpings: number[]): number {
-  let totalNumber = 0;
-
-  totalNumber = jumpings.reduce(
-    (jumpDistanceSoFar, currentJump) => jumpDistanceSoFar + currentJump
-  );
-
-  return totalNumber;
+function getLength(jumpDistances: number[]): number {
+  return jumpDistances.reduce((p, c) => p + c);
 }
 
 /*
@@ -27,14 +21,7 @@ class Student {
 }
 
 function getStudentStatus(student: Student): string {
-  student.passed =
-    student.name == "Sebastian"
-      ? student.handedInOnTime
-        ? true
-        : false
-      : false;
-
-  if (student.passed) {
+  if (student.name == "Sebastian" && student.handedInOnTime) {
     return "VG";
   } else {
     return "IG";
@@ -46,22 +33,22 @@ function getStudentStatus(student: Student): string {
   Det finns flera code smells att identifiera här. Vissa är lurigare än andra.
   */
 
-class Temp {
-  constructor(public q: string, public where: Date, public v: number) {}
+class Weather {
+  constructor(public city: string, public date: Date, public temp: number) {}
 }
 
-function averageWeeklyTemperature(heights: Temp[]) {
-  let r = 0;
-
-  for (let who = 0; who < heights.length; who++) {
-    if (heights[who].q === "Stockholm") {
-      if (heights[who].where.getTime() > Date.now() - 604800000) {
-        r += heights[who].v;
-      }
+function averageWeeklyTemperature(weatherData: Weather[]) {
+  const totalTemperature = weatherData.reduce((previous, current) => {
+    if (
+      current.city === "Stockholm" &&
+      current.date.getTime() > Date.now() - 604800000
+    ) {
+      previous += current.temp;
     }
-  }
+    return previous;
+  }, 0);
 
-  return r / 7;
+  return totalTemperature / 7;
 }
 
 /*
@@ -69,26 +56,27 @@ function averageWeeklyTemperature(heights: Temp[]) {
   Se om du kan göra det bättre. Inte bara presentationen räknas, även strukturer.
   */
 
-function showProduct(
-  name: string,
-  price: number,
-  amount: number,
-  description: string,
-  image: string,
-  parent: HTMLElement
-) {
-  let container = document.createElement("div");
-  let title = document.createElement("h4");
-  let pris = document.createElement("strong");
-  let imageTag = document.createElement("img");
+class Product {
+  constructor(
+    public name: string,
+    public price: number,
+    public image: string
+  ) {}
+}
 
-  title.innerHTML = name;
-  pris.innerHTML = price.toString();
-  imageTag.src = image;
+function showProduct(product: Product, parent: HTMLElement) {
+  const container = document.createElement("div");
+  const title = document.createElement("h4");
+  const price = document.createElement("strong");
+  const image = document.createElement("img");
+
+  title.innerHTML = product.name;
+  price.innerHTML = product.price.toString();
+  image.src = product.image;
 
   container.appendChild(title);
-  container.appendChild(imageTag);
-  container.appendChild(pris);
+  container.appendChild(image);
+  container.appendChild(price);
   parent.appendChild(container);
 }
 
@@ -97,41 +85,34 @@ function showProduct(
   går att göra betydligt bättre. Gör om så många som du kan hitta!
   */
 function presentStudents(students: Student[]) {
+  const listOfPassedStudents = document.querySelector("ul#passedstudents");
+  const listOfFailedStudents = document.querySelector("ul#failedstudents");
+
   for (const student of students) {
+    const listItem = document.createElement("li");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+
     if (student.handedInOnTime) {
-      let container = document.createElement("div");
-      let checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
       checkbox.checked = true;
-
-      container.appendChild(checkbox);
-      let listOfStudents = document.querySelector("ul#passedstudents");
-      listOfStudents?.appendChild(container);
+      listItem.appendChild(checkbox);
+      listOfPassedStudents?.appendChild(listItem);
     } else {
-      let container = document.createElement("div");
-      let checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
       checkbox.checked = false;
-
-      container.appendChild(checkbox);
-      let listOfStudents = document.querySelector("ul#failedstudents");
-      listOfStudents?.appendChild(container);
+      listItem.appendChild(checkbox);
+      listOfFailedStudents?.appendChild(listItem);
     }
   }
 }
-
 /*
   6. Skriv en funktion som skall slå ihop följande texter på ett bra sätt:
   Lorem, ipsum, dolor, sit, amet
   Exemplet under löser problemet, men inte speciellt bra. Hur kan man göra istället?
   */
+
 function concatenateStrings() {
-  let result = "";
-  result += "Lorem";
-  result += "ipsum";
-  result += "dolor";
-  result += "sit";
-  result += "amet";
+  let words = ["Lorem", "ipsum", "dolor", "sit", "amet"];
+  let result = words.join(", ");
 
   return result;
 }
@@ -142,22 +123,25 @@ function concatenateStrings() {
     fler och fler parametrar behöver läggas till? T.ex. avatar eller adress. Hitta en bättre
     lösning som är hållbar och skalar bättre. 
 */
-function createUser(
-  name: string,
-  birthday: Date,
-  email: string,
-  password: string
-) {
-  // Validation
 
+class User {
+  constructor(
+    public name: string,
+    public birthday: Date,
+    public email: string,
+    public password: string
+  ) {}
+}
+
+function getUserAge(birthday: Date) {
   let ageDiff = Date.now() - birthday.getTime();
   let ageDate = new Date(ageDiff);
-  let userAge = Math.abs(ageDate.getUTCFullYear() - 1970);
+  return Math.abs(ageDate.getUTCFullYear() - 1970);
+}
 
-  console.log(userAge);
-
-  if (!(userAge < 20)) {
-    // Logik för att skapa en användare
+function createUser(user: User) {
+  if (!(getUserAge(user.birthday) < 20)) {
+    return user;
   } else {
     return "Du är under 20 år";
   }
